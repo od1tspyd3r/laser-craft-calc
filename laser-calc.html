@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LaserCraft Studio — PWA Pricing Calculator & AI Vision</title>
+    
+    <!-- PWA & Mobile Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LaserCraft">
+    <meta name="theme-color" id="themeColorMeta" content="#0b0f17">
+    <meta name="application-name" content="LaserCraft Studio">
+
+    <!-- iOS App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%2310b981'><rect width='512' height='512' rx='128' fill='%230f172a'/><path d='M256 64L384 448H128L256 64Z' fill='none' stroke='%2310b981' stroke-width='32'/><circle cx='256' cy='280' r='64' fill='%2310b981'/></svg>">
+
+    <!-- Embedded Web App Manifest -->
+    <link rel="manifest" id="manifestPlaceholder">
+    <script>
+      // Generate Web App Manifest dynamically via Data URI
+      const manifestData = {
+        "name": "LaserCraft Studio - Pricing Calculator",
+        "short_name": "LaserCraft",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#0b0f17",
+        "theme_color": "#0b0f17",
+        "description": "AI-Powered Precision Laser Craft Pricing Calculator with Vision Analysis & Offline PWA support",
+        "icons": [
+          {
+            "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%230f172a'/><path d='M256 64L384 448H128L256 64Z' fill='none' stroke='%2310b981' stroke-width='32'/><circle cx='256' cy='280' r='64' fill='%2310b981'/></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+          }
+        ]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+      document.getElementById('manifestPlaceholder').setAttribute('href', URL.createObjectURL(manifestBlob));
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#ecfdf5',
+                100: '#d1fae5',
+                400: '#34d399',
+                500: '#10b981',
+                600: '#059669',
+                900: '#064e3b',
+              },
+              dark: {
+                950: '#070a0f',
+                900: '#0b0f17',
+                800: '#111827',
+                700: '#1f293d',
+                600: '#374151'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              mono: ['Fira Code', 'monospace']
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js for Cost Breakdown -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      /* Mobile Touch Optimizations */
+      * {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, sans-serif;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* Dark Theme Defaults */
+      .dark body {
+        background-color: #0b0f17;
+        color: #f3f4f6;
+        background-image: 
+          radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+          radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
+      }
+
+      /* Light Theme Defaults */
+      .light body {
+        background-color: #f8fafc;
+        color: #0f172a;
+        background-image: 
+          radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+          radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
+      }
+
+      /* Glassmorphism Styles for Dark Mode */
+      .dark .glass-card {
+        background: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .dark .glass-card-sm {
+        background: rgba(31, 41, 61, 0.5);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* Glassmorphism Styles for Light Mode */
+      .light .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      }
+      .light .glass-card-sm {
+        background: rgba(241, 245, 249, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .glow-emerald {
+        box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #374151;
+        border-radius: 4px;
+      }
+
+      /* Animated Gauge Marker */
+      .gauge-transition {
+        transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Scanning Pulse animation */
+      @keyframes scanPulse {
+        0%, 100% { opacity: 0.3; transform: translateY(-100%); }
+        50% { opacity: 0.8; transform: translateY(100%); }
+      }
+      .animate-scan {
+        animation: scanPulse 2s ease-in-out infinite;
+      }
+
+      /* Safe area insets for notched iPhones */
+      .safe-pb {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
+      .safe-pt {
+        padding-top: max(1rem, env(safe-area-inset-top));
+      }
+    </style>
+</head>
+<body class="min-h-screen pb-24 lg:pb-16 text-slate-900 dark:text-slate-100 selection:bg-emerald-500 selection:text-slate-900">
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800/80 glass-card">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-burst"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-lg tracking-tight">LaserCraft<span class="text-emerald-500 dark:text-emerald-400"> Studio</span></h1>
+              <span id="offlineBadge" class="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>PWA</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Precision Pricing & AI Photo Analysis</p>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Actions -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Install App Button -->
+          <button onclick="openInstallModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition">
+            <i class="fa-solid fa-mobile-screen-button text-emerald-500"></i>
+            <span class="hidden sm:inline">Install App</span>
+          </button>
+
+          <!-- Theme Toggle -->
+          <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs transition" title="Toggle Theme">
+            <i id="themeIcon" class="fa-solid fa-moon"></i>
+          </button>
+
+          <!-- Quick Reset -->
+          <button onclick="resetCalculator()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs transition" title="Reset All Fields">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+
+          <!-- Export/Print Quote -->
+          <button onclick="window.print()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs transition" title="Export Summary">
+            <i class="fa-solid fa-file-pdf"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT/CENTER COLUMN: Input Controls (8 Cols) -->
+        <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+
+            <!-- 1. Gemini AI Vision Photo Scanner -->
+            <section id="aiScanner" class="glass-card rounded-2xl p-5 md:p-6 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-2">
+                    <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
+                      <i class="fa-solid fa-camera-retro text-base"></i>
+                    </div>
+                    <div>
+                      <h2 class="font-bold text-base">Gemini AI Photo Scanner</h2>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Capture or upload photo to auto-estimate material, dimensions & cut time</p>
+                    </div>
+                  </div>
+                  <span class="hidden sm:inline-block text-[11px] font-mono bg-indigo-500/10 text-indigo-500 dark:text-indigo-300 border border-indigo-500/20 px-2.5 py-1 rounded-full">
+                    gemini-2.5-flash
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                  <!-- Photo Dropzone -->
+                  <div class="md:col-span-8">
+                    <label id="dropZone" for="photoInput" class="group relative flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500/60 rounded-xl cursor-pointer bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition duration-200 text-center p-4">
+                      <div id="uploadPrompt" class="flex flex-col items-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-emerald-500 transition duration-200">
+                          <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                        </div>
+                        <p class="text-xs font-medium">
+                          <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Take Photo / Upload</span> or drag craft file
+                        </p>
+                        <p class="text-[10px] text-slate-400">PNG, JPG, WEBP (Supports Camera Capture)</p>
+                      </div>
+                      
+                      <!-- Preview Thumbnail Overlay -->
+                      <div id="previewContainer" class="hidden absolute inset-0 rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center">
+                        <img id="imagePreview" src="" alt="Craft Preview" class="h-full w-full object-contain">
+                        <div id="scanningOverlay" class="hidden absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
+                          <div class="w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-scan absolute top-0"></div>
+                          <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-2xl"></i>
+                          <span class="text-xs font-semibold text-emerald-300 tracking-wider">ANALYZING CRAFT...</span>
+                        </div>
+                      </div>
+
+                      <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+                  </div>
+
+                  <!-- AI Action Column -->
+                  <div class="md:col-span-4 flex flex-col justify-between h-full space-y-2">
+                    <button id="analyzeBtn" onclick="runGeminiAnalysis()" disabled class="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-300 dark:border-slate-700/60 flex items-center justify-center gap-2 transition glow-emerald">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i>
+                      <span>Analyze Photo</span>
+                    </button>
+                    
+                    <div id="aiStatusBox" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1">
+                      <div class="flex items-center justify-between font-medium">
+                        <span>AI Scanner</span>
+                        <span id="aiBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500">Idle</span>
+                      </div>
+                      <p id="aiStatusText" class="text-slate-500 leading-tight">Ready for image upload.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- AI Detected Insights Container -->
+                <div id="aiAnalysisResults" class="hidden mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                      <i class="fa-solid fa-brain"></i> AI Suggestions
+                    </span>
+                    <button onclick="applyAiSuggestions()" class="text-[11px] text-emerald-600 dark:text-emerald-300 hover:underline bg-emerald-500/10 px-2.5 py-1 rounded-md transition font-medium">
+                      Apply All
+                    </button>
+                  </div>
+                  <div id="aiTagsContainer" class="flex flex-wrap gap-2 text-xs"></div>
+                </div>
+            </section>
+
+            <!-- 2. Primary Material Calculator -->
+            <section class="glass-card rounded-2xl p-5 md:p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
+                      <i class="fa-solid fa-layer-group text-sm"></i>
+                    </div>
+                    <h2 class="font-semibold text-base">1. Primary Material Sheet</h2>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Material Cost</span>
+                    <span id="matCostDisplay" class="font-mono text-sm font-bold text-amber-500">$0.00</span>
+                  </div>
+                </div>
+
+                <!-- Material Presets & Custom Presets Header -->
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-xs font-semibold text-slate-500 dark:text-slate-400">Material Presets</label>
+                    <button onclick="openCustomPresetModal()" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center gap-1">
+                      <i class="fa-solid fa-plus text-[10px]"></i> Save Custom Preset
+                    </button>
+                  </div>
+                  <div id="presetButtonsBar" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                    <!-- Standard presets injected dynamically -->
+                  </div>
+                </div>
+
+                <!-- Sheet Dimension Inputs -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1">
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Sheet Width (in)</label>
+                    <input type="number" id="sheetW" value="12" step="0.5" min="0.1" oninput="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Sheet Height (in)</label>
+                    <input type="number" id="sheetH" value="12" step="0.5" min="0.1" oninput="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Full Sheet Price ($)</label>
+                    <input type="number" id="sheetPrice" value="14.00" step="0.25" min="0" oninput="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Waste Margin (%)</label>
+                    <input type="number" id="wastePct" value="15" step="1" min="0" max="100" oninput="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                </div>
+
+                <!-- Craft Dimension Inputs -->
+                <div class="p-3.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center text-xs">
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Craft Width (in)</label>
+                    <input type="number" id="craftW" value="6" step="0.25" min="0.1" oninput="calculateAll()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Craft Height (in)</label>
+                    <input type="number" id="craftH" value="6" step="0.25" min="0.1" oninput="calculateAll()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div class="sm:text-right">
+                    <span class="text-slate-400 block text-[11px]">Area & Yield/Sheet</span>
+                    <span id="craftYieldDisplay" class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">36 sq in (4 pcs)</span>
+                  </div>
+                </div>
+            </section>
+
+            <!-- 3. Accessories, Finishes & Hardware -->
+            <section class="glass-card rounded-2xl p-5 md:p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center border border-cyan-500/20">
+                      <i class="fa-solid fa-boxes-packing text-sm"></i>
+                    </div>
+                    <h2 class="font-semibold text-base">2. Accessories, Finishes & Hardware</h2>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Finishing Cost</span>
+                    <span id="accTotalDisplay" class="font-mono text-sm font-bold text-cyan-500">$0.00</span>
+                  </div>
+                </div>
+
+                <!-- Dynamic Line Items Container -->
+                <div id="accItemList" class="space-y-2"></div>
+
+                <!-- Add Category Actions -->
+                <div class="pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 dark:border-slate-800">
+                  <div class="flex flex-wrap gap-1.5 text-xs">
+                    <span class="text-slate-400 self-center text-[11px] mr-1">Quick Add:</span>
+                    <button onclick="addAccessory('Paint & Stain', 1, 1.50)" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs transition">🎨 Paint/Stain</button>
+                    <button onclick="addAccessory('Resin / Epoxy', 1, 3.50)" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs transition">🧪 Resin/Epoxy</button>
+                    <button onclick="addAccessory('Hardware Fasteners', 2, 0.40)" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs transition">🔩 Fasteners</button>
+                    <button onclick="addAccessory('Packaging & Box', 1, 1.80)" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs transition">📦 Packaging</button>
+                  </div>
+                  <button onclick="addAccessory('Custom Add-on', 1, 1.00)" class="text-xs text-cyan-600 dark:text-cyan-400 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Add Line Item
+                  </button>
+                </div>
+            </section>
+
+            <!-- 4. Machine Overhead -->
+            <section class="glass-card rounded-2xl p-5 md:p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center border border-purple-500/20">
+                      <i class="fa-solid fa-bolt text-sm"></i>
+                    </div>
+                    <h2 class="font-semibold text-base">3. Machine Operating Overhead</h2>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Machine Cost</span>
+                    <span id="laserCostDisplay" class="font-mono text-sm font-bold text-purple-500">$0.00</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Laser Cut Time (min)</label>
+                    <input type="number" id="laserTime" value="12" step="0.5" min="0" oninput="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Machine Rate ($/hr)</label>
+                    <input type="number" id="hourlyMachineRate" value="45.00" step="1" min="0" oninput="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono focus:border-emerald-500 focus:outline-none transition">
+                  </div>
+                  <div>
+                    <label class="block text-slate-500 dark:text-slate-400 mb-1">Power Load Profile</label>
+                    <select id="powerProfile" onchange="calculateAll()" class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 focus:border-emerald-500 focus:outline-none transition">
+                      <option value="1.0">Standard Vector Cut (100% Load)</option>
+                      <option value="0.7">Light Raster Engrave (70% Load)</option>
+                      <option value="1.2">Heavy Deep Acrylic Cut (120% Load)</option>
+                    </select>
+                  </div>
+                </div>
+            </section>
+
+            <!-- 5. Labor & Design Setup -->
+            <section class="glass-card rounded-2xl p-5 md:p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20">
+                      <i class="fa-solid fa-user-gear text-sm"></i>
+                    </div>
+                    <h2 class="font-semibold text-base">4. Labor & File Setup</h2>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Labor Total</span>
+                    <span id="laborCostDisplay" class="font-mono text-sm font-bold text-blue-500">$0.00</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div class="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                    <span class="font-semibold block border-b border-slate-200 dark:border-slate-800 pb-1">Vector / Design File Setup</span>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <label class="block text-slate-400 mb-1">Setup (min)</label>
+                        <input type="number" id="setupTime" value="10" step="1" min="0" oninput="calculateAll()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 font-mono">
+                      </div>
+                      <div>
+                        <label class="block text-slate-400 mb-1">Rate ($/hr)</label>
+                        <input type="number" id="designRate" value="35.00" step="1" min="0" oninput="calculateAll()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 font-mono">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                    <span class="font-semibold block border-b border-slate-200 dark:border-slate-800 pb-1">Assembly & Sanding Time</span>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <label class="block text-slate-400 mb-1">Assembly (min)</label>
+                        <input type="number" id="assemblyTime" value="15" step="1" min="0" oninput="calculateAll()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 font-mono">
+                      </div>
+                      <div>
+                        <label class="block text-slate-400 mb-1">Labor Rate ($/hr)</label>
+                        <input type="number" id="laborRate" value="25.00" step="1" min="0" oninput="calculateAll()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 font-mono">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Dashboard, Charts & Saved Items (5 Cols) -->
+        <div class="lg:col-span-5 xl:col-span-4 space-y-6">
+
+            <div class="lg:sticky lg:top-20 space-y-6">
+
+                <!-- MAIN PRICING SUMMARY DASHBOARD -->
+                <section class="glass-card rounded-2xl p-6 glow-emerald relative overflow-hidden border-emerald-500/30">
+                    <div class="flex items-center justify-between mb-4">
+                      <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calculator"></i> Retail Calculator
+                      </span>
+                      <span class="text-xs text-slate-400 font-mono" id="cogsHeaderDisplay">COGS: $0.00</span>
+                    </div>
+
+                    <!-- Recommended Retail Price -->
+                    <div class="bg-slate-100 dark:bg-slate-900/80 rounded-2xl p-4 border border-emerald-500/30 text-center mb-5">
+                      <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold block mb-1">Suggested Retail Price</span>
+                      <div class="text-4xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white" id="retailPriceDisplay">
+                        $0.00
+                      </div>
+                      <div class="flex items-center justify-center gap-2 mt-2 text-xs">
+                        <span id="profitMarginBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono font-semibold">+0% Margin</span>
+                        <span id="netProfitDisplay" class="text-slate-500 dark:text-slate-300 font-mono">$0.00 Net Profit</span>
+                      </div>
+                    </div>
+
+                    <!-- Margin Slider -->
+                    <div class="space-y-3 mb-5">
+                      <div class="flex items-center justify-between text-xs">
+                        <label class="font-semibold text-slate-600 dark:text-slate-300">Target Profit Margin</label>
+                        <span id="marginValDisplay" class="font-mono font-bold text-emerald-500">60%</span>
+                      </div>
+                      <input type="range" id="marginSlider" min="10" max="85" value="60" step="1" oninput="calculateAll()" class="w-full accent-emerald-500 bg-slate-200 dark:bg-slate-800 rounded-lg cursor-pointer h-2">
+                    </div>
+
+                    <!-- Detailed Financial Breakdown -->
+                    <div class="space-y-2 text-xs font-mono border-t border-slate-200 dark:border-slate-800 pt-4">
+                      <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Total COGS (Cost of Goods):</span>
+                        <span id="totalCogsDisplay" class="font-semibold">$0.00</span>
+                      </div>
+                      <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Wholesale Price (2x COGS):</span>
+                        <span id="wholesalePriceDisplay" class="text-indigo-500 font-semibold">$0.00</span>
+                      </div>
+                      <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Etsy / Payment Fees (~8%):</span>
+                        <span id="feesDisplay" class="text-amber-500">$0.00</span>
+                      </div>
+                      <div class="flex justify-between font-bold border-t border-slate-200 dark:border-slate-800/80 pt-2 text-sm">
+                        <span class="text-emerald-600 dark:text-emerald-400">Take-Home Profit:</span>
+                        <span id="takeHomeProfitDisplay" class="text-emerald-600 dark:text-emerald-400">$0.00</span>
+                      </div>
+                    </div>
+
+                    <!-- Save & Copy Actions -->
+                    <div class="grid grid-cols-2 gap-2 mt-5">
+                      <button onclick="saveProjectQuote()" class="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-bookmark"></i> Save Quote
+                      </button>
+                      <button onclick="copySummaryToClipboard()" class="py-2.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-copy"></i> Copy Quote
+                      </button>
+                    </div>
+                </section>
+
+                <!-- MARKET COMPETITIVENESS GAUGE -->
+                <section class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line text-indigo-500"></i> Market Price Gauge
+                      </span>
+                      <span id="marketStatusTag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                        COMPETITIVE
+                      </span>
+                    </div>
+
+                    <div class="relative pt-4 pb-2">
+                      <div class="h-3 w-full rounded-full bg-gradient-to-r from-blue-500 via-emerald-500 via-amber-500 to-red-500 relative overflow-hidden"></div>
+                      <div id="gaugePointer" class="absolute top-1 gauge-transition -translate-x-1/2 flex flex-col items-center" style="left: 45%;">
+                        <div class="w-3 h-3 bg-white rounded-full shadow-md border-2 border-slate-900"></div>
+                        <i class="fa-solid fa-caret-down text-slate-900 dark:text-white text-xs -mt-1"></i>
+                      </div>
+                    </div>
+
+                    <div class="flex justify-between text-[10px] font-semibold text-slate-400">
+                      <span>Underpriced</span>
+                      <span>Competitive</span>
+                      <span>Premium</span>
+                      <span>Overpriced</span>
+                    </div>
+
+                    <p id="marketInsightText" class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug pt-1">
+                      Price aligns well with online benchmark listings for custom laser crafts.
+                    </p>
+                </section>
+
+                <!-- VISUAL COST BREAKDOWN CHART -->
+                <section class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-pie text-cyan-500"></i> Cost Distribution
+                      </span>
+                    </div>
+                    <div class="relative h-44 w-full flex items-center justify-center">
+                      <canvas id="costChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- SAVED PROJECTS LIST -->
+                <section class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-folder-open text-amber-500"></i> Saved Quotes
+                      </span>
+                      <button onclick="clearAllQuotes()" class="text-[10px] text-slate-400 hover:text-red-400 transition">Clear All</button>
+                    </div>
+                    <div id="savedQuotesList" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                </section>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <div class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-6 py-2 flex items-center justify-around safe-pb">
+      <button onclick="scrollToSection('aiScanner')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-[10px]">
+        <i class="fa-solid fa-camera text-base"></i>
+        <span>Scan</span>
+      </button>
+      <button onclick="scrollToSection('presetButtonsBar')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-[10px]">
+        <i class="fa-solid fa-layer-group text-base"></i>
+        <span>Material</span>
+      </button>
+      <button onclick="openInstallModal()" class="flex flex-col items-center gap-1 text-emerald-400 font-bold text-[10px]">
+        <div class="w-10 h-10 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg -mt-5 border-4 border-slate-950">
+          <i class="fa-solid fa-download text-sm"></i>
+        </div>
+        <span>Install App</span>
+      </button>
+      <button onclick="saveProjectQuote()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-[10px]">
+        <i class="fa-solid fa-bookmark text-base"></i>
+        <span>Save</span>
+      </button>
+      <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-[10px]">
+        <i class="fa-solid fa-arrow-up text-base"></i>
+        <span>Top</span>
+      </button>
+    </div>
+
+    <!-- PWA INSTALL INSTRUCTIONS MODAL -->
+    <div id="installModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-emerald-500/30 shadow-2xl relative">
+        <button onclick="closeInstallModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-2xl shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-burst"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg">Install LaserCraft App</h3>
+            <p class="text-xs text-slate-400">Install to home screen for full offline support</p>
+          </div>
+        </div>
+
+        <!-- Android Native Prompt Button (Hidden by default until triggered) -->
+        <div id="androidInstallBox" class="hidden">
+          <button onclick="triggerAndroidInstall()" class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i> Install Now (1-Tap)
+          </button>
+        </div>
+
+        <!-- iOS Safari Instructions -->
+        <div class="space-y-3 pt-2 text-xs">
+          <span class="font-semibold text-emerald-400 block border-b border-slate-800 pb-1">iPhone / iPad (Safari) Guide:</span>
+          <ol class="space-y-2 list-decimal list-inside text-slate-300">
+            <li>Tap the <strong class="text-white">Share</strong> button <i class="fa-solid fa-share-from-square text-emerald-400"></i> in Safari bottom bar.</li>
+            <li>Scroll down and select <strong class="text-white">Add to Home Screen</strong> <i class="fa-regular fa-square-plus text-emerald-400"></i>.</li>
+            <li>Tap <strong class="text-white">Add</strong> in top right corner.</li>
+          </ol>
+        </div>
+
+        <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+          Got It
+        </button>
+      </div>
+    </div>
+
+    <!-- CUSTOM PRESET CREATOR MODAL -->
+    <div id="presetModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="glass-card rounded-2xl max-w-sm w-full p-6 space-y-4 border border-slate-700 shadow-2xl relative">
+        <button onclick="closeCustomPresetModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-emerald-400"></i> Save Custom Preset
+        </h3>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Preset Name</label>
+            <input type="text" id="customPresetName" placeholder="e.g., 3mm Walnut Veneer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-400 mb-1">Sheet Width (in)</label>
+              <input type="number" id="customPresetW" value="12" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Sheet Height (in)</label>
+              <input type="number" id="customPresetH" value="12" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Sheet Price ($)</label>
+            <input type="number" id="customPresetPrice" value="12.00" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <button onclick="saveCustomPreset()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
+          Save Preset to Inventory
+        </button>
+      </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast" class="fixed bottom-16 lg:bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition duration-300 glass-card px-4 py-3 rounded-xl border-emerald-500/40 text-xs font-semibold text-emerald-400 flex items-center gap-2 shadow-2xl">
+      <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+      <span id="toastMsg">Action completed</span>
+    </div>
+
+    <!-- Main Logic Script -->
+    <script>
+      // Global State
+      let state = {
+        theme: 'dark',
+        accessories: [
+          { id: 'acc_1', name: 'Paint / Clear Coat', qty: 1, unitCost: 1.50 },
+          { id: 'acc_2', name: 'Hardware & Fasteners', qty: 2, unitCost: 0.40 }
+        ],
+        customPresets: {},
+        savedQuotes: [],
+        deferredPrompt: null
+      };
+
+      // Material Standard Presets
+      const DEFAULT_PRESETS = {
+        acr6: { name: '1/4" Acrylic (6mm)', w: 12, h: 12, price: 14.00, icon: '💎' },
+        ply3: { name: '1/8" Birch Plywood', w: 12, h: 12, price: 4.50, icon: '🪵' },
+        ply6: { name: '1/4" Birch Plywood', w: 12, h: 12, price: 7.20, icon: '🪵' },
+        acr3: { name: '1/8" Acrylic (3mm)', w: 12, h: 12, price: 8.50, icon: '✨' },
+        leather: { name: 'Genuine Leather', w: 12, h: 12, price: 18.00, icon: '💼' },
+        mdf3: { name: '1/8" MDF Sheet', w: 12, h: 12, price: 3.00, icon: '📦' }
+      };
+
+      let costChart = null;
+
+      // On Initialization
+      window.onload = function() {
+        registerInlineServiceWorker();
+        loadSavedTheme();
+        loadCustomPresets();
+        loadSavedQuotes();
+        renderPresetButtons();
+        renderAccessories();
+        initChart();
+        calculateAll();
+
+        // Listen for PWA installation prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          state.deferredPrompt = e;
+          document.getElementById('androidInstallBox')?.classList.remove('hidden');
+        });
+      };
+
+      // Inline Blob Service Worker for Offline Functionality
+      function registerInlineServiceWorker() {
+        if ('serviceWorker' in navigator) {
+          const swCode = `
+            const CACHE_NAME = 'lasercraft-pwa-v2.5';
+            self.addEventListener('install', (e) => {
+              self.skipWaiting();
+            });
+            self.addEventListener('activate', (e) => {
+              e.waitUntil(clients.claim());
+            });
+            self.addEventListener('fetch', (e) => {
+              e.respondWith(
+                fetch(e.request).catch(() => caches.match(e.request))
+              );
+            });
+          `;
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+        }
+      }
+
+      // Theme Management
+      function toggleTheme() {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(state.theme);
+        localStorage.setItem('lasercraft_theme', state.theme);
+      }
+
+      function applyTheme(theme) {
+        const icon = document.getElementById('themeIcon');
+        const themeMeta = document.getElementById('themeColorMeta');
+        if (theme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          icon.className = 'fa-solid fa-sun text-amber-500';
+          themeMeta.setAttribute('content', '#f8fafc');
+        } else {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          icon.className = 'fa-solid fa-moon text-slate-300';
+          themeMeta.setAttribute('content', '#0b0f17');
+        }
+      }
+
+      function loadSavedTheme() {
+        const saved = localStorage.getItem('lasercraft_theme') || 'dark';
+        state.theme = saved;
+        applyTheme(saved);
+      }
+
+      // Material Presets Render
+      function renderPresetButtons() {
+        const container = document.getElementById('presetButtonsBar');
+        if (!container) return;
+
+        const allPresets = { ...DEFAULT_PRESETS, ...state.customPresets };
+
+        container.innerHTML = Object.keys(allPresets).map(key => {
+          const p = allPresets[key];
+          return `
+            <button onclick="selectPreset('${key}')" id="preset-${key}" class="preset-btn px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs text-left transition font-medium flex flex-col">
+              <span class="font-bold truncate text-slate-800 dark:text-slate-200">${p.icon || '📦'} ${escapeHtml(p.name)}</span>
+              <span class="text-[10px] text-slate-400">$${p.price.toFixed(2)} (${p.w}x${p.h})</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      function selectPreset(key) {
+        const allPresets = { ...DEFAULT_PRESETS, ...state.customPresets };
+        const preset = allPresets[key];
+        if (!preset) return;
+
+        document.getElementById('sheetW').value = preset.w;
+        document.getElementById('sheetH').value = preset.h;
+        document.getElementById('sheetPrice').value = preset.price.toFixed(2);
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+          btn.classList.remove('border-emerald-500', 'bg-emerald-500/10');
+        });
+        const activeBtn = document.getElementById(`preset-${key}`);
+        if (activeBtn) activeBtn.classList.add('border-emerald-500', 'bg-emerald-500/10');
+
+        calculateAll();
+        showToast(`Selected: ${preset.name}`);
+      }
+
+      // Custom Presets
+      function openCustomPresetModal() { document.getElementById('presetModal').classList.remove('hidden'); }
+      function closeCustomPresetModal() { document.getElementById('presetModal').classList.add('hidden'); }
+
+      function saveCustomPreset() {
+        const name = document.getElementById('customPresetName').value.trim() || 'Custom Sheet';
+        const w = parseFloat(document.getElementById('customPresetW').value) || 12;
+        const h = parseFloat(document.getElementById('customPresetH').value) || 12;
+        const price = parseFloat(document.getElementById('customPresetPrice').value) || 10;
+
+        const key = 'cust_' + Date.now();
+        state.customPresets[key] = { name, w, h, price, icon: '🎨' };
+        
+        localStorage.setItem('lasercraft_custom_presets', JSON.stringify(state.customPresets));
+        renderPresetButtons();
+        selectPreset(key);
+        closeCustomPresetModal();
+        showToast("Custom preset saved!");
+      }
+
+      function loadCustomPresets() {
+        const saved = localStorage.getItem('lasercraft_custom_presets');
+        if (saved) {
+          try { state.customPresets = JSON.parse(saved); } catch(e){}
+        }
+      }
+
+      // Gemini Vision API Integration
+      async function runGeminiAnalysis() {
+        if (!state.uploadedImageData) return;
+
+        const scanningOverlay = document.getElementById('scanningOverlay');
+        const aiStatusText = document.getElementById('aiStatusText');
+        const aiBadge = document.getElementById('aiBadge');
+        
+        scanningOverlay.classList.remove('hidden');
+        aiStatusText.innerText = "Analyzing geometry, materials & laser run times...";
+        aiBadge.innerText = "Scanning...";
+        aiBadge.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 font-semibold";
+
+        const base64Image = state.uploadedImageData.split(',')[1];
+        
+        const systemPrompt = `Analyze the craft photo and return JSON with estimated properties:
+{
+  "materialType": "1/4 Acrylic",
+  "craftWidthInches": 6,
+  "craftHeightInches": 6,
+  "laserCutTimeMinutes": 12,
+  "assemblyTimeMinutes": 10
+}`;
+
+        const payload = {
+          contents: [{
+            role: "user",
+            parts: [
+              { text: systemPrompt },
+              { inlineData: { mimeType: "image/jpeg", data: base64Image } }
+            ]
+          }]
+        };
+
+        const apiKey = ""; // Canvas runtime auto injects key
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          const responseText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (responseText) {
+            const cleanJsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+            const parsedData = JSON.parse(cleanJsonStr);
+            state.aiSuggestions = parsedData;
+            displayAiResults(parsedData);
+
+            aiStatusText.innerText = "Analysis complete! Click apply to auto-fill.";
+            aiBadge.innerText = "Success";
+            aiBadge.className = "text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-semibold";
+          }
+        } catch (err) {
+          aiStatusText.innerText = "Used default estimates.";
+          aiBadge.innerText = "Ready";
+        } finally {
+          scanningOverlay.classList.add('hidden');
+        }
+      }
+
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          state.uploadedImageData = e.target.result;
+          document.getElementById('imagePreview').src = state.uploadedImageData;
+          document.getElementById('previewContainer').classList.remove('hidden');
+
+          const btn = document.getElementById('analyzeBtn');
+          btn.disabled = false;
+          btn.className = "w-full py-3 px-4 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center gap-2 transition glow-emerald";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function displayAiResults(data) {
+        const container = document.getElementById('aiAnalysisResults');
+        const tagsContainer = document.getElementById('aiTagsContainer');
+        container.classList.remove('hidden');
+
+        tagsContainer.innerHTML = `
+          <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <strong>Material:</strong> ${data.materialType || 'Acrylic'}
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <strong>Size:</strong> ${data.craftWidthInches || 6}" × ${data.craftHeightInches || 6}"
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <strong>Cut Time:</strong> ${data.laserCutTimeMinutes || 12}m
+          </span>
+        `;
+      }
+
+      function applyAiSuggestions() {
+        if (!state.aiSuggestions) return;
+        const s = state.aiSuggestions;
+        if (s.craftWidthInches) document.getElementById('craftW').value = s.craftWidthInches;
+        if (s.craftHeightInches) document.getElementById('craftH').value = s.craftHeightInches;
+        if (s.laserCutTimeMinutes) document.getElementById('laserTime').value = s.laserCutTimeMinutes;
+        calculateAll();
+        showToast("Applied AI suggestions!");
+      }
+
+      // Accessories Line Items
+      function renderAccessories() {
+        const listEl = document.getElementById('accItemList');
+        if (!listEl) return;
+
+        if (state.accessories.length === 0) {
+          listEl.innerHTML = `<div class="text-xs text-slate-400 italic py-2 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-xl">No line items added yet.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = state.accessories.map(acc => `
+          <div class="grid grid-cols-12 gap-2 items-center bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-xs">
+            <div class="col-span-5">
+              <input type="text" value="${escapeHtml(acc.name)}" onchange="updateAccessory('${acc.id}', 'name', this.value)" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none">
+            </div>
+            <div class="col-span-3">
+              <input type="number" value="${acc.qty}" min="1" oninput="updateAccessory('${acc.id}', 'qty', parseFloat(this.value) || 0)" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 font-mono text-center">
+            </div>
+            <div class="col-span-3 flex items-center gap-1">
+              <span class="text-slate-400">$</span>
+              <input type="number" value="${acc.unitCost.toFixed(2)}" min="0" step="0.1" oninput="updateAccessory('${acc.id}', 'unitCost', parseFloat(this.value) || 0)" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 font-mono">
+            </div>
+            <div class="col-span-1 flex justify-end">
+              <button onclick="removeAccessory('${acc.id}')" class="text-slate-400 hover:text-red-400 p-1">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function addAccessory(name, qty, unitCost) {
+        state.accessories.push({ id: 'acc_' + Date.now(), name, qty, unitCost });
+        renderAccessories();
+        calculateAll();
+      }
+
+      function updateAccessory(id, key, val) {
+        const item = state.accessories.find(a => a.id === id);
+        if (item) { item[key] = val; calculateAll(); }
+      }
+
+      function removeAccessory(id) {
+        state.accessories = state.accessories.filter(a => a.id !== id);
+        renderAccessories();
+        calculateAll();
+      }
+
+      // Calculations Engine
+      function calculateAll() {
+        const sheetW = parseFloat(document.getElementById('sheetW').value) || 12;
+        const sheetH = parseFloat(document.getElementById('sheetH').value) || 12;
+        const sheetPrice = parseFloat(document.getElementById('sheetPrice').value) || 0;
+        const wastePct = parseFloat(document.getElementById('wastePct').value) || 0;
+
+        const craftW = parseFloat(document.getElementById('craftW').value) || 1;
+        const craftH = parseFloat(document.getElementById('craftH').value) || 1;
+
+        const laserTime = parseFloat(document.getElementById('laserTime').value) || 0;
+        const hourlyMachineRate = parseFloat(document.getElementById('hourlyMachineRate').value) || 0;
+        const powerProfile = parseFloat(document.getElementById('powerProfile').value) || 1.0;
+
+        const setupTime = parseFloat(document.getElementById('setupTime').value) || 0;
+        const designRate = parseFloat(document.getElementById('designRate').value) || 0;
+        const assemblyTime = parseFloat(document.getElementById('assemblyTime').value) || 0;
+        const laborRate = parseFloat(document.getElementById('laborRate').value) || 0;
+
+        const marginPct = parseFloat(document.getElementById('marginSlider').value) || 60;
+
+        // Area & Material Cost
+        const fullSheetArea = sheetW * sheetH;
+        const craftArea = craftW * craftH;
+        const costPerSqIn = fullSheetArea > 0 ? (sheetPrice / fullSheetArea) : 0;
+        const rawMatCost = craftArea * costPerSqIn;
+        const matCostWithWaste = rawMatCost * (1 + (wastePct / 100));
+
+        const yieldCount = fullSheetArea > 0 ? Math.floor(fullSheetArea / (craftArea || 1)) : 0;
+        document.getElementById('craftYieldDisplay').innerText = `${craftArea.toFixed(1)} sq in (${yieldCount} pcs/sheet)`;
+        document.getElementById('matCostDisplay').innerText = `$${matCostWithWaste.toFixed(2)}`;
+
+        // Accessories Cost
+        const accCostTotal = state.accessories.reduce((sum, item) => sum + (item.qty * item.unitCost), 0);
+        document.getElementById('accTotalDisplay').innerText = `$${accCostTotal.toFixed(2)}`;
+
+        // Machine Cost
+        const laserCost = (laserTime / 60) * hourlyMachineRate * powerProfile;
+        document.getElementById('laserCostDisplay').innerText = `$${laserCost.toFixed(2)}`;
+
+        // Labor Cost
+        const designCost = (setupTime / 60) * designRate;
+        const assemblyCost = (assemblyTime / 60) * laborRate;
+        const totalLaborCost = designCost + assemblyCost;
+        document.getElementById('laborCostDisplay').innerText = `$${totalLaborCost.toFixed(2)}`;
+
+        // COGS & Retail Margin
+        const totalCogs = matCostWithWaste + accCostTotal + laserCost + totalLaborCost;
+        const marginDecimal = marginPct / 100;
+        const retailPrice = marginDecimal < 1 ? totalCogs / (1 - marginDecimal) : totalCogs * 2;
+        const netProfit = retailPrice - totalCogs;
+        const wholesalePrice = totalCogs * 2.0;
+        const etsyFees = retailPrice * 0.08;
+        const takeHomeProfit = netProfit - etsyFees;
+
+        // UI Updates
+        document.getElementById('cogsHeaderDisplay').innerText = `COGS: $${totalCogs.toFixed(2)}`;
+        document.getElementById('retailPriceDisplay').innerText = `$${retailPrice.toFixed(2)}`;
+        document.getElementById('netProfitDisplay').innerText = `$${netProfit.toFixed(2)} Net Profit`;
+        document.getElementById('profitMarginBadge').innerText = `+${marginPct}% Margin`;
+        document.getElementById('marginValDisplay').innerText = `${marginPct}%`;
+
+        document.getElementById('totalCogsDisplay').innerText = `$${totalCogs.toFixed(2)}`;
+        document.getElementById('wholesalePriceDisplay').innerText = `$${wholesalePrice.toFixed(2)}`;
+        document.getElementById('feesDisplay').innerText = `$${etsyFees.toFixed(2)}`;
+        document.getElementById('takeHomeProfitDisplay').innerText = `$${takeHomeProfit.toFixed(2)}`;
+
+        updateMarketGauge(retailPrice);
+        updateChart(matCostWithWaste, accCostTotal, laserCost, totalLaborCost, Math.max(0, netProfit));
+      }
+
+      function updateMarketGauge(price) {
+        const gaugePointer = document.getElementById('gaugePointer');
+        const marketStatusTag = document.getElementById('marketStatusTag');
+        const insightText = document.getElementById('marketInsightText');
+
+        let percent = ((price - 10) / (60 - 10)) * 100;
+        percent = Math.max(5, Math.min(95, percent));
+        gaugePointer.style.left = `${percent}%`;
+
+        if (percent < 25) {
+          marketStatusTag.innerText = "UNDERPRICED";
+          marketStatusTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500 border border-blue-500/30";
+          insightText.innerText = "Below average Etsy pricing. Room to increase margin.";
+        } else if (percent <= 65) {
+          marketStatusTag.innerText = "COMPETITIVE";
+          marketStatusTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30";
+          insightText.innerText = "Sweet spot! Aligns perfectly with market benchmarks.";
+        } else if (percent <= 85) {
+          marketStatusTag.innerText = "PREMIUM";
+          marketStatusTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30";
+          insightText.innerText = "Boutique pricing for personalized or high-detail orders.";
+        } else {
+          marketStatusTag.innerText = "OVERPRICED";
+          marketStatusTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-500 border border-red-500/30";
+          insightText.innerText = "Higher than market standard. Try optimizing laser cut times.";
+        }
+      }
+
+      function initChart() {
+        const ctx = document.getElementById('costChart').getContext('2d');
+        costChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Materials', 'Accessories', 'Machine', 'Labor', 'Profit'],
+            datasets: [{
+              data: [3, 2, 4, 5, 10],
+              backgroundColor: ['#f59e0b', '#06b6d4', '#a855f7', '#3b82f6', '#10b981'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { size: 10, family: 'Inter' }, usePointStyle: true }
+              }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+
+      function updateChart(mat, acc, laser, labor, profit) {
+        if (!costChart) return;
+        costChart.data.datasets[0].data = [mat, acc, laser, labor, profit];
+        costChart.update();
+      }
+
+      // Saved Quotes
+      function saveProjectQuote() {
+        const retailStr = document.getElementById('retailPriceDisplay').innerText;
+        const craftW = document.getElementById('craftW').value;
+        const craftH = document.getElementById('craftH').value;
+
+        const quote = {
+          id: Date.now(),
+          date: new Date().toLocaleDateString(),
+          title: `Project (${craftW}"x${craftH}")`,
+          price: retailStr
+        };
+
+        state.savedQuotes.unshift(quote);
+        localStorage.setItem('lasercraft_quotes', JSON.stringify(state.savedQuotes));
+        renderSavedQuotes();
+        showToast("Quote saved to project history!");
+      }
+
+      function renderSavedQuotes() {
+        const listEl = document.getElementById('savedQuotesList');
+        if (!listEl) return;
+
+        if (state.savedQuotes.length === 0) {
+          listEl.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-2">No saved quotes yet.</p>`;
+          return;
+        }
+
+        listEl.innerHTML = state.savedQuotes.map(q => `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+            <div>
+              <span class="font-semibold block">${escapeHtml(q.title)}</span>
+              <span class="text-[10px] text-slate-400">${q.date}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-emerald-500">${q.price}</span>
+              <button onclick="deleteQuote(${q.id})" class="text-slate-400 hover:text-red-400 text-xs">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function deleteQuote(id) {
+        state.savedQuotes = state.savedQuotes.filter(q => q.id !== id);
+        localStorage.setItem('lasercraft_quotes', JSON.stringify(state.savedQuotes));
+        renderSavedQuotes();
+      }
+
+      function clearAllQuotes() {
+        state.savedQuotes = [];
+        localStorage.removeItem('lasercraft_quotes');
+        renderSavedQuotes();
+      }
+
+      function loadSavedQuotes() {
+        const saved = localStorage.getItem('lasercraft_quotes');
+        if (saved) {
+          try { state.savedQuotes = JSON.parse(saved); } catch(e){}
+        }
+      }
+
+      // PWA Install Modal Functions
+      function openInstallModal() { document.getElementById('installModal').classList.remove('hidden'); }
+      function closeInstallModal() { document.getElementById('installModal').classList.add('hidden'); }
+
+      function triggerAndroidInstall() {
+        if (state.deferredPrompt) {
+          state.deferredPrompt.prompt();
+          state.deferredPrompt.userChoice.then(() => {
+            state.deferredPrompt = null;
+            closeInstallModal();
+          });
+        }
+      }
+
+      function copySummaryToClipboard() {
+        const retail = document.getElementById('retailPriceDisplay').innerText;
+        const cogs = document.getElementById('totalCogsDisplay').innerText;
+        const summaryText = `LaserCraft Quote:\n• Retail Price: ${retail}\n• Total COGS: ${cogs}`;
+
+        const tempInput = document.createElement('textarea');
+        tempInput.value = summaryText;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+
+        showToast("Quote summary copied!");
+      }
+
+      function resetCalculator() {
+        document.getElementById('craftW').value = 6;
+        document.getElementById('craftH').value = 6;
+        document.getElementById('marginSlider').value = 60;
+        selectPreset('acr6');
+        showToast("Calculator reset.");
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMsg').innerText = msg;
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+      }
+
+      function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
+      function escapeHtml(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    </script>
+</body>
+</html>
